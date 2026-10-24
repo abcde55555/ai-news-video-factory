@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-按节奏基准重建时间轴。
+按原版指标重建时间轴。
 
-节奏基准：
+原版实测基准（奥森木 10 条）：
   - 单条字幕 3.0-3.34s / 约 17 字；总字数 700-1800（中位 ~1230）
   - 语速约 5.47 汉字/秒；页数 18-30；每页 4-8s
 流程：定义镜头组与文案 -> TTS -> 实测语音时长 -> 镜头时长=语音和+缓冲 -> 输出 cues 与 shots
@@ -12,7 +12,7 @@ import edge_tts
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 VOICE = "zh-CN-YunxiNeural"
-RATE = "+20%"           # +20% 约 5.7 字/秒；想更稳可降到 +8%
+RATE = "+20%"           # 默认语速（约 5.8 字/秒）。+8% 偏稳，+30%/+40% 更急促
 TAG = "p" + RATE.replace('+', '').replace('%', '')
 OUT_DIR = os.path.join(ROOT, "public", "vo")
 TRACK = os.path.join(ROOT, "public", "voice.mp3")
@@ -44,6 +44,10 @@ SHOTS = [
         "联系客服这条路走不通，它就换了个办法。",
         "发邮件之前，它先问你：要不要发这封。",
     ]),
+    ("evidence", "takeaways", "right",  1.6, [
+        "这段不是我编的。官方新闻稿的第一条要点里，",
+        "就写着从处理保险理赔、看懂租约，到做一个能用的 App。",
+    ]),
     ("chapter",  "规格",      "right",  1.0, ["再看纸面规格。"]),
     ("stat",     "statContext", "right", 1.4, [
         "上下文窗口一百万 token，比上一代再往上抬。",
@@ -65,6 +69,21 @@ SHOTS = [
         "长周期编程 SWE-Marathon，",
         "它拿到百分之五十七点五，",
         "Claude Opus 5.5 是百分之四十六点三。",
+    ]),
+    ("compare",  "compareIndex", "right", 1.5, [
+        "但这组数字要看口径：不是每项都赢。",
+        "第三方 Artificial Analysis 的综合指数上，",
+        "Wonder Full 五十六，标准版 Wonder 五十二，",
+        "Opus 5.5 是五十八，仍然在前。",
+    ]),
+    ("compare",  "compareBalance", "right", 1.4, [
+        "换成命令行和健康问答，优势就反过来了。",
+        "Terminal-Bench 上 Opus 5.5 是五十九点六，",
+        "Wonder Full 五十七点一。",
+    ]),
+    ("evidence", "realworld", "right",  1.6, [
+        "同一篇新闻稿里，专门有一段讲真实世界的需求。",
+        "法律、金融、健康，这些是官方写明的目标领域。",
     ]),
     ("split",    None,        "right",  1.4, [
         "两个新能力撑起了这些表现。",
@@ -93,10 +112,11 @@ SHOTS = [
     ]),
     ("chapter",  "三条局限",   "right",  1.0, ["局限也一起说清楚。"]),
     ("limits",   None,        "right",  1.4, [
-        "局限一：Full 版不开放 API，只能订阅 Muse Code。",
-        "局限二：输出只有文本，不会回图片或视频。",
-        "局限三：竞品对比是 Meta 自己测的，",
-        "并非受控条件，参考价值要打个折。",
+        "局限一：Full 版不开放 API，只能订阅 Muse Code，",
+        "每月五十或两百美元。",
+        "局限二：输出只有文本，也不提供开源权重。",
+        "局限三：订阅默认开启 Contributor 模式，",
+        "你的代码可能被用来训练，记得第一天就关掉。",
     ]),
     ("source",   None,        "fade",   1.4, [
         "以上内容来自 Meta 官方新闻稿、研究博客与模型卡，",
@@ -137,7 +157,7 @@ async def main():
         start0 = t
         for txt in texts:
             d = durs[k]
-            # 字幕轨几乎无缝填满全片（64条×3.27s≈成片时长），故句间只留极小间隙
+            # 原版字幕轨几乎无缝填满全片（64条×3.27s≈成片时长），故句间只留极小间隙
             st = round(t + 0.1, 2)
             en = round(st + d + 0.15, 2)
             all_cues.append({"start": st, "end": en, "text": txt})
@@ -165,8 +185,8 @@ async def main():
 
     chars = sum(len(c["text"]) for c in all_cues)
     print(f"字幕 {len(all_cues)} 条 / 总字数 {chars} / 语音总长 {sum(durs.values()):.1f}s / 成片 {total}s")
-    print(f"平均单条 {chars/len(all_cues):.1f} 字，语速 {chars/sum(durs.values()):.2f} 字/秒（基准 5.47）")
-    print(f"镜头数 {len(shots)}（基准 18-30）")
+    print(f"平均单条 {chars/len(all_cues):.1f} 字，语速 {chars/sum(durs.values()):.2f} 字/秒（原版 5.47）")
+    print(f"镜头数 {len(shots)}（原版 18-30）")
 
     json.dump({"shots": shots, "cues": all_cues, "duration": total},
               open(os.path.join(ROOT, "timeline.json"), "w"), ensure_ascii=False, indent=1)

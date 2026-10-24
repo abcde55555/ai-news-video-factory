@@ -38,6 +38,8 @@ description: 把一条大模型/AI 科技新闻做成 3-4 分钟的动效解说�
 
 **同时必须找出产品的 3 条真实局限**——结尾主动讲局限是可信度最高的设计。
 
+去 AI 味的关键：厂商自报的 benchmark 必须标注口径（混合内部/厂商/第三方、是否受控），并至少给一页**第三方独立评测**和一页**落后项**。详见 `references/evidence.md`。
+
 ### 3. 写脚本：套 8 段式结构
 
 | 段 | 时长 | 作用 | 情绪 |
@@ -111,6 +113,7 @@ env -u NODE_OPTIONS TMPDIR="$T" CODEBUDDY_BROKERED_FS_HOOK_ENABLED=0 \
 
 ## 参考资源
 
+- `references/evidence.md` —— 证据与口径：交叉验证、来源标注、真实素材接入
 - `references/scene-playbook.md` —— 10 种版式规范与适用场景
 - `references/transitions.md` —— 转场系统、贯穿母题（手机聊天 UI）、「产品感」原则
 - `references/tech-choice.md` —— 技术选型对比与 Remotion 能力边界

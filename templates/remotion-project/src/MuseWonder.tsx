@@ -9,6 +9,7 @@ import type {Shot} from './data/timeline';
 import {SubtitleTrack} from './components/SubtitleTrack';
 import {AudioTrack} from './components/AudioTrack';
 import {ChatScene} from './components/PhoneChat';
+import {OfficialEvidence} from './components/OfficialEvidence';
 import {BrandMark, ChapterPage, KenBurns} from './components/detail';
 import {
   BlueprintScene,
@@ -30,7 +31,12 @@ const s = (sec: number) => Math.round(sec * FPS);
  * 单条字幕 ~3.2s / ~20 字、语速 ~5.1 字/秒、页数 19、总时长 4:12。
  */
 const STATS = {statContext: content.statContext, statPrice: content.statPrice};
-const COMPARES = {compareLegal: content.compareLegal, compareCode: content.compareCode};
+const COMPARES = {
+  compareLegal: content.compareLegal,
+  compareCode: content.compareCode,
+  compareIndex: content.compareIndex,
+  compareBalance: content.compareBalance,
+};
 
 const nodeFor = (shot: Shot): React.ReactNode => {
   switch (shot.id) {
@@ -42,6 +48,8 @@ const nodeFor = (shot: Shot): React.ReactNode => {
       return <FourGrid items={content.fourGrid} />;
     case 'chat':
       return <ChatScene />;
+    case 'evidence':
+      return <OfficialEvidence variant={shot.prop === 'realworld' ? 'realworld' : 'takeaways'} />;
     case 'stat': {
       const key = shot.prop as keyof typeof STATS;
       return <StatScene {...STATS[key]} />;
@@ -73,9 +81,10 @@ const nodeFor = (shot: Shot): React.ReactNode => {
   }
 };
 
-/** 转场：原片 80% 硬切 + 20% 推近/滑入；这里只在章节页切换处做滑动，其余用短淡入 */
+/** 转场：章节页切换处做滑动，其余短淡入。时长必须与 Sequence 补偿一致，否则时间轴漂移 */
 const TRANS_S = 0.5;
 const needsTransition = (shot: Shot) => shot.enter !== 'none' && shot.id === 'chapter';
+const transDurFor = (shot: Shot) => (needsTransition(shot) ? TRANS_S : 0.28);
 const presentationFor = (shot: Shot) =>
   shot.enter === 'bottom'
     ? slide({direction: 'from-bottom'})
@@ -93,14 +102,15 @@ export const MuseWonder: React.FC = () => (
             <TransitionSeries.Transition
               key={`t${i}`}
               presentation={needsTransition(shot) ? presentationFor(shot) : fade()}
-              timing={linearTiming({durationInFrames: needsTransition(shot) ? s(TRANS_S) : s(0.28)})}
+              timing={linearTiming({durationInFrames: s(transDurFor(shot))})}
             />,
           );
         }
+        // 补偿 = 本镜头之后那个转场的时长，保证镜头实际起点与 shots.from 严格一致
         items.push(
           <TransitionSeries.Sequence
             key={`s${i}`}
-            durationInFrames={s(shot.dur) + (i < shots.length - 1 ? s(TRANS_S) : 0)}
+            durationInFrames={s(shot.dur) + (i < shots.length - 1 ? s(transDurFor(shots[i + 1])) : 0)}
           >
             {/* KenBurns：页内持续缓慢推近，避免静帧感 */}
             <KenBurns to={shot.id === 'chapter' ? 1.03 : 1.055}>

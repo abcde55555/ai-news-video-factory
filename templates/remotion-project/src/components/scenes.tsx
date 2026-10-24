@@ -1,10 +1,32 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {blueprint, FONT_CN, FONT_NUM, gridBackground, light, shell} from '../theme';
 import {CountUp, GrowBar, Kicker, Rise, Scene, StaggerText} from './primitives';
 import {TitlePhoneBurst} from './PhoneChat';
 
 /* ---------------------------------- 1. 标题卡 ---------------------------------- */
+
+/**
+ * 标题卡背景：官方视觉物料（Meta 新闻稿 social share 图），不是自绘。
+ * 上面叠一层白色渐变保证标题可读。
+ */
+const OfficialHero: React.FC = () => {
+  const frame = useCurrentFrame();
+  const scale = interpolate(frame, [0, 260], [1.02, 1.08], {extrapolateRight: 'clamp'});
+  return (
+    <AbsoluteFill style={{overflow: 'hidden'}}>
+      <Img
+        src={staticFile('official/museWonder_socialShare.jpg')}
+        style={{width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})`}}
+      />
+      <AbsoluteFill
+        style={{
+          background: 'linear-gradient(90deg, rgba(243,241,236,0.98) 0%, rgba(243,241,236,0.95) 44%, rgba(243,241,236,0.55) 100%)',
+        }}
+      />
+    </AbsoluteFill>
+  );
+};
 
 const WonderWall: React.FC = () => {
   const frame = useCurrentFrame();
@@ -40,7 +62,7 @@ export const TitleCard: React.FC = () => {
   const lineW = interpolate(frame, [30, 60], [0, 520], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
   return (
     <Scene bg={light.bg}>
-      <WonderWall />
+      <OfficialHero />
       <AbsoluteFill style={{...shell, flexDirection: 'row', alignItems: 'center', gap: 60}}>
         <div style={{flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
           <Kicker text="2026.10.12 · Meta 发布" bg="#E7ECF5" color={light.ink} />
