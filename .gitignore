@@ -1,0 +1,17 @@
+# 依赖（模板工程 npm install 后产生）
+node_modules/
+
+# macOS
+.DS_Store
+
+# Remotion 渲染产物
+out/
+.tmp*/
+chromeprofile/
+public/vo/
+public/voice.mp3
+public/bgm.mp3
+timeline.json
+
+# 日志
+*.log
