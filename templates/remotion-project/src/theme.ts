@@ -37,7 +37,7 @@ export const blueprint = {
 
 /**
  * 品牌水印配置。
- * 默认关闭——请勿填入参考博主的名字/头像，那是他人的署名与肖像。
+ * 默认关闭——请勿填入他人的名字/头像，那是他人的署名与肖像。
  * 想加自己的品牌层时，在下面填上自己的名字与首字即可自动启用。
  */
 export const brand: {name: string; initial: string} = {

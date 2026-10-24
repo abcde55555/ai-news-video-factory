@@ -15,7 +15,7 @@ import {brand, FONT_CN, FONT_NUM, light} from '../theme';
 /**
  * 右上角品牌水印。
  * 名称与首字来自 theme.ts 的 `brand`，默认为空即不渲染——
- * 不要填入被参考博主的名字/头像（那是他人的署名与肖像，也构成冒充）。
+ * 不要填入他人的名字/头像（那是他人的署名与肖像，也构成冒充）。
  */
 export const BrandMark: React.FC<{name?: string; initial?: string; tone?: 'light' | 'dark'}> = ({
   name = brand.name,

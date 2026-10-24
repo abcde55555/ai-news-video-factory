@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-按原版指标重建时间轴。
+按节奏基准重建时间轴。
 
-原版实测基准（参考博主近 10 条）：
+节奏基准：
   - 单条字幕 3.0-3.34s / 约 17 字；总字数 700-1800（中位 ~1230）
   - 语速约 5.47 汉字/秒；页数 18-30；每页 4-8s
 流程：定义镜头组与文案 -> TTS -> 实测语音时长 -> 镜头时长=语音和+缓冲 -> 输出 cues 与 shots
@@ -12,8 +12,8 @@ import edge_tts
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 VOICE = "zh-CN-YunxiNeural"
-RATE = "+8%"            # 目标语速 5.47 字/秒；+20% 太快，+8% 更接近原版
-TAG = "s08"
+RATE = "+20%"           # +20% 约 5.7 字/秒；想更稳可降到 +8%
+TAG = "p" + RATE.replace('+', '').replace('%', '')
 OUT_DIR = os.path.join(ROOT, "public", "vo")
 TRACK = os.path.join(ROOT, "public", "voice.mp3")
 
@@ -137,14 +137,14 @@ async def main():
         start0 = t
         for txt in texts:
             d = durs[k]
-            # 原版字幕轨几乎无缝填满全片（64条×3.27s≈成片时长），故句间只留极小间隙
+            # 字幕轨几乎无缝填满全片（64条×3.27s≈成片时长），故句间只留极小间隙
             st = round(t + 0.1, 2)
             en = round(st + d + 0.15, 2)
             all_cues.append({"start": st, "end": en, "text": txt})
             seg.append(en)
             t = en + 0.15
             k += 1
-        dur_shot = round(t - start0 + (0.6 if sid == 'chapter' else 0.8), 2)
+        dur_shot = round(t - start0 + (0.5 if sid == 'chapter' else 0.7), 2)
         shots.append({"id": sid, "prop": prop, "enter": enter,
                       "from": round(start0, 2), "dur": dur_shot})
         t = start0 + dur_shot
@@ -165,8 +165,8 @@ async def main():
 
     chars = sum(len(c["text"]) for c in all_cues)
     print(f"字幕 {len(all_cues)} 条 / 总字数 {chars} / 语音总长 {sum(durs.values()):.1f}s / 成片 {total}s")
-    print(f"平均单条 {chars/len(all_cues):.1f} 字，语速 {chars/sum(durs.values()):.2f} 字/秒（原版 5.47）")
-    print(f"镜头数 {len(shots)}（原版 18-30）")
+    print(f"平均单条 {chars/len(all_cues):.1f} 字，语速 {chars/sum(durs.values()):.2f} 字/秒（基准 5.47）")
+    print(f"镜头数 {len(shots)}（基准 18-30）")
 
     json.dump({"shots": shots, "cues": all_cues, "duration": total},
               open(os.path.join(ROOT, "timeline.json"), "w"), ensure_ascii=False, indent=1)

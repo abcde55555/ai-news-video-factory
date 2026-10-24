@@ -26,7 +26,7 @@ import {FPS} from './theme';
 const s = (sec: number) => Math.round(sec * FPS);
 
 /**
- * 镜头内容映射。时间轴（shots/cues）由 build_timeline.py 按原版实测指标生成：
+ * 镜头内容映射。时间轴（shots/cues）由 build_timeline.py 按节奏基准生成：
  * 单条字幕 ~3.2s / ~20 字、语速 ~5.1 字/秒、页数 19、总时长 4:12。
  */
 const STATS = {statContext: content.statContext, statPrice: content.statPrice};
